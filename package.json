@@ -1,8 +1,9 @@
 {
     "name": "create-plasmic-react-native-web",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "Starter kit for setting up a react-native project and connect it with a Plasmic project.",
     "main": "index.mjs",
+    "type": "module",
     "bin": {
         "create-plasmic-react-native-web": "./index.mjs"
     },
