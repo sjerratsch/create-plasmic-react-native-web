@@ -1,0 +1,16 @@
+diff --git a/node_modules/next/dist/build/webpack-config.js b/node_modules/next/dist/build/webpack-config.js
+index def57ef..cef222d 100644
+--- a/node_modules/next/dist/build/webpack-config.js
++++ b/node_modules/next/dist/build/webpack-config.js
+@@ -693,7 +693,10 @@ async function getBaseWebpackConfig(dir, { buildId , config , dev =false , isSer
+         // Anything else that is standard JavaScript within `node_modules`
+         // can be externalized.
+         if (/node_modules[/\\].*\.c?js$/.test(res)) {
+-            return `${externalType} ${request}`;
++            // Bundle everything, so we can easiliy work in development with SSR
++            // For a serverless deployment everything will be bundled anyways
++            return;
++            // return `${externalType} ${request}`;
+         }
+     // Default behavior: bundle the code!
+     }

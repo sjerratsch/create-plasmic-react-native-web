@@ -1,0 +1,16 @@
+diff --git a/node_modules/@plasmicapp/cli/dist/utils/npm-utils.js b/node_modules/@plasmicapp/cli/dist/utils/npm-utils.js
+index ab078b3..8322e9f 100644
+--- a/node_modules/@plasmicapp/cli/dist/utils/npm-utils.js
++++ b/node_modules/@plasmicapp/cli/dist/utils/npm-utils.js
+@@ -227,11 +227,6 @@ function installCommand(pkg, baseDir, opts = {}) {
+ }
+ exports.installCommand = installCommand;
+ function detectPackageManager(baseDir) {
+-    const yarnLock = findup_sync_1.default("yarn.lock", { cwd: baseDir });
+-    if (yarnLock) {
+-        const yarnVersion = child_process_1.execSync(`yarn --version`).toString().trim();
+-        return semver_1.default.gte(yarnVersion, "2.0.0") ? "yarn2" : "yarn";
+-    }
+     return "npm";
+ }
+ exports.detectPackageManager = detectPackageManager;

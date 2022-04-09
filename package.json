@@ -1,0 +1,21 @@
+{
+    "name": "create-plasmic-react-native-web",
+    "version": "0.1.0",
+    "description": "Starter kit for setting up a react-native project and connect it with a Plasmic project.",
+    "main": "index.mjs",
+    "bin": {
+        "create-plasmic-react-native-web": "./index.mjs"
+    },
+    "author": "Sebastian Jerratsch <s.jerratsch@agvolution.com>",
+    "license": "MIT",
+    "prettier": {
+        "tabWidth": 4
+    },
+    "dependencies": {
+        "chalk": "^5.0.1",
+        "yargs": "^17.3.1"
+    },
+    "devDependencies": {
+        "@types/node": "^17.0.21"
+    }
+}

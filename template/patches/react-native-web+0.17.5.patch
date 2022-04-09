@@ -1,0 +1,191 @@
+diff --git a/node_modules/react-native-web/dist/cjs/exports/StyleSheet/flattenStyle.js b/node_modules/react-native-web/dist/cjs/exports/StyleSheet/flattenStyle.js
+index 0e19687..4090156 100644
+--- a/node_modules/react-native-web/dist/cjs/exports/StyleSheet/flattenStyle.js
++++ b/node_modules/react-native-web/dist/cjs/exports/StyleSheet/flattenStyle.js
+@@ -18,11 +18,24 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
+  *
+  * 
+  */
+-function getStyle(style) {
++ function getStyle(style) {
+   if (typeof style === 'number') {
+     return _ReactNativePropRegistry.default.getByID(style);
+   }
+ 
++  // remove property keys which are numbers
++  // fix (workaround?) for error "CSS2Properties doesn't have an indexed property setter for '0'"
++  if (typeof style !== "string") {
++    for (var k in style) {
++      if (typeof k === "number" || !isNaN(+k)) {
++        delete style[k];
++      }
++    }
++  }
++  else {
++    return {};
++  }
++
+   return style;
+ }
+ 
+diff --git a/node_modules/react-native-web/dist/cjs/exports/View/index.js b/node_modules/react-native-web/dist/cjs/exports/View/index.js
+index 4a2a430..1421882 100644
+--- a/node_modules/react-native-web/dist/cjs/exports/View/index.js
++++ b/node_modules/react-native-web/dist/cjs/exports/View/index.js
+@@ -103,6 +103,7 @@ var View = /*#__PURE__*/React.forwardRef(function (props, forwardedRef) {
+   var style = _StyleSheet.default.compose(hasTextAncestor && styles.inline, props.style);
+ 
+   var supportedProps = pickProps(props);
++  // supportedProps.classList = [props.className, classes.view];
+   supportedProps.classList = classList;
+   supportedProps.style = style;
+ 
+diff --git a/node_modules/react-native-web/dist/cjs/modules/createDOMProps/index.js b/node_modules/react-native-web/dist/cjs/modules/createDOMProps/index.js
+index a0d4a36..11bf734 100644
+--- a/node_modules/react-native-web/dist/cjs/modules/createDOMProps/index.js
++++ b/node_modules/react-native-web/dist/cjs/modules/createDOMProps/index.js
+@@ -118,6 +118,7 @@ var createDOMProps = function createDOMProps(elementType, props) {
+       accessibilityValueNow = _props.accessibilityValueNow,
+       accessibilityValueText = _props.accessibilityValueText,
+       classList = _props.classList,
++      className = _props.className,
+       dataSet = _props.dataSet,
+       focusable = _props.focusable,
+       nativeID = _props.nativeID,
+@@ -406,9 +407,11 @@ var createDOMProps = function createDOMProps(elementType, props) {
+   var needsCursor = (role === 'button' || role === 'link') && !disabled;
+   var needsReset = elementType === 'a' || elementType === 'button' || elementType === 'li' || elementType === 'ul' || role === 'heading'; // Classic CSS styles
+ 
+-  var finalClassList = [needsReset && classes.reset, needsCursor && classes.cursor, classList]; // Resolve styles
++  var classNameStyles = className && className.split(" ").filter(cl => !isNaN(+cl)).map(cl => +cl);
++  var classNamePassThrough = className && className.split(" ").filter(cl => Object.values(classList || {}).indexOf(cl) === -1);
++  var finalClassList = [needsReset && classes.reset, needsCursor && classes.cursor, classList, classNamePassThrough]; // Resolve styles
+ 
+-  var _styleResolver$resolv = _styleResolver.default.resolve(reactNativeStyle, finalClassList),
++  var _styleResolver$resolv = _styleResolver.default.resolve([reactNativeStyle, classNameStyles], finalClassList),
+       className = _styleResolver$resolv.className,
+       style = _styleResolver$resolv.style;
+ 
+diff --git a/node_modules/react-native-web/dist/cjs/modules/forwardedProps/index.js b/node_modules/react-native-web/dist/cjs/modules/forwardedProps/index.js
+index 8ddbf5a..1dc1186 100644
+--- a/node_modules/react-native-web/dist/cjs/modules/forwardedProps/index.js
++++ b/node_modules/react-native-web/dist/cjs/modules/forwardedProps/index.js
+@@ -115,6 +115,7 @@ var touchProps = {
+ };
+ exports.touchProps = touchProps;
+ var styleProps = {
++  className: true,
+   classList: true,
+   style: true
+ };
+diff --git a/node_modules/react-native-web/dist/exports/StyleSheet/flattenStyle.js b/node_modules/react-native-web/dist/exports/StyleSheet/flattenStyle.js
+index e6018c1..043aafe 100644
+--- a/node_modules/react-native-web/dist/exports/StyleSheet/flattenStyle.js
++++ b/node_modules/react-native-web/dist/exports/StyleSheet/flattenStyle.js
+@@ -15,6 +15,19 @@ function getStyle(style) {
+     return ReactNativePropRegistry.getByID(style);
+   }
+ 
++  // remove property keys which are numbers
++  // fix (workaround?) for error "CSS2Properties doesn't have an indexed property setter for '0'"
++  if (typeof style !== "string") {
++    for (var k in style) {
++      if (typeof k === "number" || !isNaN(+k)) {
++        delete style[k];
++      }
++    }
++  }
++  else {
++    return {};
++  }
++
+   return style;
+ }
+ 
+diff --git a/node_modules/react-native-web/dist/exports/View/index.js b/node_modules/react-native-web/dist/exports/View/index.js
+index 2a3e325..4c35312 100644
+--- a/node_modules/react-native-web/dist/exports/View/index.js
++++ b/node_modules/react-native-web/dist/exports/View/index.js
+@@ -89,6 +89,7 @@ var View = /*#__PURE__*/React.forwardRef(function (props, forwardedRef) {
+   var component = 'div';
+   var style = StyleSheet.compose(hasTextAncestor && styles.inline, props.style);
+   var supportedProps = pickProps(props);
++  // supportedProps.classList = [props.className, classes.view];
+   supportedProps.classList = classList;
+   supportedProps.style = style;
+ 
+diff --git a/node_modules/react-native-web/dist/modules/createDOMProps/index.js b/node_modules/react-native-web/dist/modules/createDOMProps/index.js
+index d3796b2..a48915a 100644
+--- a/node_modules/react-native-web/dist/modules/createDOMProps/index.js
++++ b/node_modules/react-native-web/dist/modules/createDOMProps/index.js
+@@ -113,6 +113,7 @@ var createDOMProps = function createDOMProps(elementType, props) {
+       accessibilityValueNow = _props.accessibilityValueNow,
+       accessibilityValueText = _props.accessibilityValueText,
+       classList = _props.classList,
++      className = _props.className,
+       dataSet = _props.dataSet,
+       focusable = _props.focusable,
+       nativeID = _props.nativeID,
+@@ -398,9 +399,11 @@ var createDOMProps = function createDOMProps(elementType, props) {
+   var needsCursor = (role === 'button' || role === 'link') && !disabled;
+   var needsReset = elementType === 'a' || elementType === 'button' || elementType === 'li' || elementType === 'ul' || role === 'heading'; // Classic CSS styles
+ 
+-  var finalClassList = [needsReset && classes.reset, needsCursor && classes.cursor, classList]; // Resolve styles
++  var classNameStyles = className && className.split(" ").filter(cl => !isNaN(+cl)).map(cl => +cl);
++  var classNamePassThrough = className && className.split(" ").filter(cl => Object.values(classList || {}).indexOf(cl) === -1);
++  var finalClassList = [needsReset && classes.reset, needsCursor && classes.cursor, classList, classNamePassThrough]; // Resolve styles
+ 
+-  var _styleResolver$resolv = styleResolver.resolve(reactNativeStyle, finalClassList),
++  var _styleResolver$resolv = _styleResolver.default.resolve([reactNativeStyle, classNameStyles], finalClassList),
+       className = _styleResolver$resolv.className,
+       style = _styleResolver$resolv.style;
+ 
+diff --git a/node_modules/react-native-web/dist/modules/forwardedProps/index.js b/node_modules/react-native-web/dist/modules/forwardedProps/index.js
+index 4d2ed60..db5362e 100644
+--- a/node_modules/react-native-web/dist/modules/forwardedProps/index.js
++++ b/node_modules/react-native-web/dist/modules/forwardedProps/index.js
+@@ -103,6 +103,7 @@ export var touchProps = {
+   onTouchStartCapture: true
+ };
+ export var styleProps = {
++  className: true,
+   classList: true,
+   style: true
+ };
+\ No newline at end of file
+diff --git a/node_modules/react-native-web/src/exports/View/index.js b/node_modules/react-native-web/src/exports/View/index.js
+index 13c98b7..4d98829 100644
+--- a/node_modules/react-native-web/src/exports/View/index.js
++++ b/node_modules/react-native-web/src/exports/View/index.js
+@@ -101,6 +101,7 @@ const View: React.AbstractComponent<ViewProps, HTMLElement & PlatformMethods> =
+     const style = StyleSheet.compose(hasTextAncestor && styles.inline, props.style);
+ 
+     const supportedProps = pickProps(props);
++    // supportedProps.classList = [props.className, classes.view];
+     supportedProps.classList = classList;
+     supportedProps.style = style;
+     if (props.href != null) {
+diff --git a/node_modules/react-native-web/src/exports/View/types.js b/node_modules/react-native-web/src/exports/View/types.js
+index 8cdabd9..9bef082 100644
+--- a/node_modules/react-native-web/src/exports/View/types.js
++++ b/node_modules/react-native-web/src/exports/View/types.js
+@@ -134,6 +134,7 @@ export type ViewProps = {
+     text?: ?string
+   },
+   children?: ?any,
++  className?: string,
+   focusable?: ?boolean,
+   nativeID?: ?string,
+   onBlur?: (e: any) => void,
+diff --git a/node_modules/react-native-web/src/modules/forwardedProps/index.js b/node_modules/react-native-web/src/modules/forwardedProps/index.js
+index 35782de..08d5987 100644
+--- a/node_modules/react-native-web/src/modules/forwardedProps/index.js
++++ b/node_modules/react-native-web/src/modules/forwardedProps/index.js
+@@ -111,6 +111,7 @@ export const touchProps = {
+ };
+ 
+ export const styleProps = {
++  className: true,
+   classList: true,
+   style: true
+ };
